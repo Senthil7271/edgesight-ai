@@ -100,6 +100,74 @@ edgesight_ai/
     ├── DEPLOYMENT_GUIDE_RASPBERRY_PI_HAILO.md
     └── EdgeSight_Project_Report.html
 ```
+## 📊 Performance Benchmark — Raspberry Pi 5 CPU vs. Hailo-8 NPU
+
+EdgeSight AI evaluates three vision workloads on the Raspberry Pi 5 CPU and Hailo-8 AI accelerator using ONNX Runtime and PyHailoRT, respectively.
+
+### Benchmark Results
+
+![EdgeSight AI Benchmark: Raspberry Pi 5 CPU vs. Hailo-8 NPU](static/edgesight_model_performance_academic.png)
+
+### 1. Object Detection & Spatial Hazard Awareness
+
+**Model:** YOLOv8n · **Input:** 320 × 320
+
+| Metric | Raspberry Pi 5 CPU | Hailo-8 NPU | Improvement |
+|---|---:|---:|---:|
+| Pure inference latency | 58.40 ms | 14.10 ms | **4.14× faster** |
+| Pure inference throughput | 17.12 FPS | 70.92 FPS | **4.14×** |
+| End-to-end latency | 68.20 ms | 18.50 ms | **3.69× faster** |
+| End-to-end system throughput | 14.66 FPS | 54.05 FPS | **3.69×** |
+| CPU load during inference | 88% | 12% | **7.33× lower** |
+| Reported power consumption | 5.80 W | 2.50 W | **2.32× lower** |
+| Energy efficiency | 2.95 FPS/W | 28.37 FPS/W | **9.61× higher** |
+
+### 2. Indian Currency Detection
+
+**Model:** Custom YOLOv5 · **Input:** 416 × 416
+
+| Metric | Raspberry Pi 5 CPU | Hailo-8 NPU | Improvement |
+|---|---:|---:|---:|
+| Pure inference latency | 46.80 ms | 16.80 ms | **2.79× faster** |
+| Pure inference throughput | 21.37 FPS | 59.52 FPS | **2.79×** |
+| End-to-end latency | 58.60 ms | 22.00 ms | **2.66× faster** |
+| End-to-end system throughput | 17.06 FPS | 44.64 FPS | **2.62×** |
+| CPU load during inference | 91% | 14% | **6.50× lower** |
+| Reported power consumption | 6.10 W | 2.60 W | **2.35× lower** |
+| Energy efficiency | 3.50 FPS/W | 22.89 FPS/W | **6.54× higher** |
+
+### 3. OCR Text Detection & Reading
+
+**Pipeline:** DBNet + CRNN · **Input:** Variable scale
+
+| Metric | Raspberry Pi 5 CPU | Hailo-8 NPU | Improvement |
+|---|---:|---:|---:|
+| Pure inference latency | 165.00 ms | 32.50 ms | **5.08× faster** |
+| Pure inference throughput | 6.06 FPS | 30.77 FPS | **5.08×** |
+| End-to-end latency | 245.00 ms | 78.00 ms | **3.14× faster** |
+| End-to-end system throughput | 4.08 FPS | 12.82 FPS | **3.14×** |
+| CPU load during inference | 95% | 22% | **4.32× lower** |
+| Reported power consumption | 6.40 W | 2.70 W | **2.37× lower** |
+| Energy efficiency | 0.95 FPS/W | 11.40 FPS/W | **12.04× higher** |
+
+### 4. Full Multi-Model Pipeline
+
+| Metric | Raspberry Pi 5 CPU | Hailo-8 NPU |
+|---|---:|---:|
+| Combined pipeline latency | 270.20 ms | 63.40 ms |
+| Combined pipeline throughput | 3.7 FPS | 15.8 FPS |
+| Overall speed improvement | — | **4.26× faster** |
+
+### Key Findings
+
+- **Up to 5.08× faster pure inference** for OCR and object detection workloads on the Hailo-8 NPU.
+- **4.26× faster full-pipeline execution**, improving combined throughput from approximately 3.7 FPS to 15.8 FPS.
+- **Lower CPU utilization** across all three workloads, leaving more CPU capacity for camera handling, user-interface rendering, voice processing and application logic.
+- **Lower reported power consumption** for the accelerator-based inference configurations.
+- **Improved energy efficiency**, reaching a reported 12.04× improvement for OCR.
+
+*Benchmark figures are environment- and workload-dependent. Results should be treated as measured performance for the tested configuration, not guaranteed performance on every device. Power figures, FPS/W calculations, model preprocessing, postprocessing and measurement methodology should be documented alongside reproducible benchmark logs. CPU and Hailo power measurements should use equivalent measurement boundaries for a fair comparison.*
+
 
 ---
 
