@@ -139,6 +139,37 @@ To run the multi-model CPU vs. Hailo-8 NPU benchmark evaluation:
 ```bash
 python benchmarks/benchmark_all_models.py
 ```
+## 📚 Datasets & Model Resources
+
+EdgeSight AI uses publicly available datasets and pretrained model resources for object detection and Indian currency recognition.
+
+### 1. 💵 Indian Currency Detection
+
+- **Dataset / Notebook:** [Indian Currency Classification — Kaggle](https://www.kaggle.com/code/bryamblasrimac/classification-indiancurrency-vit-accuracy-97-80/input)
+- **Model:** Custom-trained YOLOv5 model for Indian currency denomination detection.
+- **Supported denominations:** ₹10, ₹20, ₹50, ₹100, ₹200, ₹500 and ₹2000.
+
+*Note: The linked Kaggle resource is a classification notebook and its associated input data. Verify that its dataset labels and annotations are suitable for YOLO object detection before using it for training.*
+
+### 2. 🎯 General Object Detection — COCO Dataset
+
+- **Official website:** [COCO Dataset](https://cocodataset.org/)
+- **Dataset download:** [COCO 2017 — Images and Annotations](https://cocodataset.org/#download)
+- **Pretrained model:** [Ultralytics YOLOv8n](https://docs.ultralytics.com/models/yolov8/)
+- **Classes:** 80 common object categories, including people, vehicles, furniture, animals and everyday objects.
+
+The COCO dataset supports general-purpose object detection and serves as the reference dataset for the YOLOv8n object detection pipeline.
+
+### 3. 📖 OCR Resources
+
+- **RapidOCR:** [GitHub Repository](https://github.com/RapidAI/RapidOCR)
+- **Tesseract OCR:** [Official Documentation](https://github.com/tesseract-ocr/tesseract)
+
+These resources support text detection and recognition for reading printed text, signs, labels and documents.
+
+### Dataset Usage & Attribution
+
+Please refer to the original dataset and model licenses before downloading, modifying, training or redistributing any associated data or weights. Dataset and model licenses may differ from the MIT license used by this project.
 
 ---
 
