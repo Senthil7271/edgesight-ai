@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Model AI Vision Assistant (YOLO, Currency, QR/Barcode)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0e14;
+            --panel-bg: rgba(18, 24, 38, 0.88);
+            --border-color: rgba(0, 210, 255, 0.25);
+            --accent-cyan: #00d2ff;
+            --accent-green: #00ffaa;
+            --accent-purple: #8a2be2;
+            --accent-red: #ff4757;
+            --accent-gold: #ffd700;
+            --accent-blue: #3b82f6;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(138, 43, 226, 0.08) 0%, transparent 40%);
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(11, 14, 20, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 1.3rem;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        .brand-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 440px;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .viewport-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewport-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+            .btn-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .btn-describe-main {
+            padding: 14px 14px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #0b0e14;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 18px rgba(0, 255, 170, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-describe-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 255, 170, 0.5);
+        }
+
+        .btn-currency-main {
+            padding: 14px 14px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #0b0e14;
+            background: linear-gradient(135deg, var(--accent-gold), #ffaa00);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-currency-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        }
+
+        .btn-scanner-main {
+            padding: 14px 14px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 18px rgba(59, 130, 246, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-scanner-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-ocr-main {
+            padding: 14px 14px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #e74694, #a855f7);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 18px rgba(168, 85, 247, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-ocr-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+        }
+
+        .btn-voice {
+            padding: 14px 14px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid var(--accent-red);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-voice.recording {
+            background: var(--accent-red);
+            color: #fff;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+
+        .btn-speak {
+            background: rgba(138, 43, 226, 0.25);
+            border: 1px solid var(--accent-purple);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .narrative-box {
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .narrative-text {
+            font-size: 1.05rem;
+            line-height: 1.55;
+            color: #fff;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: rgba(0, 255, 170, 0.15);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            color: var(--accent-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag.currency-tag {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.5);
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .tag.scanner-tag {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #60a5fa;
+            font-weight: 700;
+        }
+
+        .voice-status-bar {
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .mode-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 7px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 210, 255, 0.18);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .tab-btn.currency-active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .tab-btn.scanner-active {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--accent-blue);
+            color: #60a5fa;
+        }
+
+        .tab-btn.ocr-active {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: #a855f7;
+            color: #c084fc;
+        }
+
+        .tag.ocr-tag {
+            background: rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.5);
+            color: #c084fc;
+            font-weight: 700;
+        }
+
+        .ocr-text-output {
+            background: rgba(168, 85, 247, 0.08);
+            border: 1.5px solid rgba(168, 85, 247, 0.4);
+            border-radius: 12px;
+            padding: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ocr-text-output .ocr-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #c084fc;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ocr-text-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            padding: 14px 16px;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 10px;
+        }
+
+        .ocr-strategy-select {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: #c084fc;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .ai-chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .ai-chat-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .quick-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.78rem;
+            cursor: pointer;
+        }
+
+        .chip:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .chip.gold-chip {
+            border-color: rgba(255, 215, 0, 0.4);
+            color: var(--accent-gold);
+        }
+
+        .chip.blue-chip {
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
+
+        .model-selector-bar {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-logo">👁️</div>
+            <div>
+                <div class="brand-title">EdgeSight — AI Vision Assistant</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Objects + Currency + QR/Barcode + OCR Reader + Voice AI</div>
+            </div>
+        </div>
+
+        <button class="btn-voice" id="voice-btn-hdr" onclick="recordVoiceCommand()">
+            🎙️ Record Voice Command
+        </button>
+    </header>
+
+    <div class="container">
+        <main>
+            <!-- Model Execution Selector -->
+            <div class="model-selector-bar">
+                <div style="font-size: 0.95rem; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    🎯 Active Model Mode:
+                </div>
+                <div class="mode-tabs">
+                    <button id="mode-btn-obj" class="tab-btn active" onclick="setDetectionMode('object')">
+                        📦 General Objects
+                    </button>
+                    <button id="mode-btn-curr" class="tab-btn" onclick="setDetectionMode('currency')">
+                        💵 Indian Currency
+                    </button>
+                    <button id="mode-btn-scan" class="tab-btn" onclick="setDetectionMode('scanner')">
+                        📱 QR & Barcode
+                    </button>
+                    <button id="mode-btn-ocr" class="tab-btn" onclick="setDetectionMode('ocr')">
+                        📖 OCR Reader
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+                    <div class="card-title" style="display: flex; align-items: center; gap: 10px;">
+                        <span>📹 Live Camera Viewport</span>
+                        <select id="camera-select" onchange="changeCameraSource(this.value)" style="background: rgba(0, 210, 255, 0.12); border: 1.5px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 8px; padding: 5px 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; outline: none; transition: all 0.2s ease;">
+                            <option value="2" selected>📷 Lenovo FHD Webcam (External)</option>
+                            <option value="0">💻 HP Wide Vision HD (Laptop)</option>
+                        </select>
+                    </div>
+                    <div class="mode-tabs">
+                        <button class="tab-btn active" onclick="switchView('live')">Live Feed</button>
+                        <button class="tab-btn" onclick="switchView('upload')">Upload Image</button>
+                    </div>
+                </div>
+
+                <div id="live-view" class="viewport-wrapper">
+                    <img id="camera-stream" src="" alt="Connecting to Camera...">
+                </div>
+
+                <div id="upload-view" class="viewport-wrapper" style="display: none; flex-direction: column;">
+                    <div class="dropzone" onclick="document.getElementById('file-input').click()">
+                        <div style="font-size: 2.5rem;">📁</div>
+                        <p>Click or drag & drop image to analyze</p>
+                        <input type="file" id="file-input" accept="image/*" style="display:none" onchange="uploadImage(this)">
+                    </div>
+                    <img id="upload-result-img" style="display:none; max-height: 100%;">
+                </div>
+
+                <!-- Voice Live Feedback Status -->
+                <div id="voice-status" class="voice-status-bar">
+                    🎙️ Voice Control Active: Click <strong>"RECORD VOICE COMMAND"</strong>, say <strong>"Read this sign"</strong>, <strong>"Scan QR code"</strong>, <strong>"Detect Rupees"</strong>, or <strong>"Capture Photo"</strong>!
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-describe-main" onclick="describeCurrentFrame('object')">
+                        📸 SNAP & DESCRIBE
+                    </button>
+                    <button class="btn-currency-main" onclick="describeCurrentFrame('currency')">
+                        💵 DETECT RUPEES
+                    </button>
+                    <button class="btn-scanner-main" onclick="describeCurrentFrame('scanner')">
+                        📱 SCAN QR / BARCODE
+                    </button>
+                    <button class="btn-ocr-main" onclick="describeCurrentFrame('ocr')">
+                        📖 READ TEXT
+                    </button>
+                    <button class="btn-voice" id="voice-btn-main" onclick="recordVoiceCommand()">
+                        🎙️ VOICE
+                    </button>
+                </div>
+
+                <!-- PROMINENT MAIN PANEL RESULT BOX (Instant View without Scrolling) -->
+                <div id="main-result-box" style="display: none; margin-top: 1.25rem; background: rgba(11, 14, 20, 0.95); border: 2px solid var(--accent-cyan); border-radius: 14px; padding: 1.25rem; box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div id="main-result-title" style="font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            📱 Detection Result
+                        </div>
+                        <button class="btn-speak" onclick="speakSummary()">
+                            🔊 Speak Result
+                        </button>
+                    </div>
+
+                    <!-- PROMINENT SCANNED QR/BARCODE DECODED OUTPUT & COPY BUTTON -->
+                    <div id="qr-output-section" style="display: none; background: rgba(59, 130, 246, 0.15); border: 1.5px solid #3b82f6; border-radius: 12px; padding: 1.1rem; margin-bottom: 1rem;">
+                        <div style="font-size: 0.88rem; font-weight: 700; color: #60a5fa; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            📋 DECODED QR / BARCODE TEXT:
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="text" id="qr-link-input" readonly style="flex: 1; min-width: 250px; background: rgba(0, 0, 0, 0.7); border: 1px solid #3b82f6; border-radius: 8px; padding: 12px 16px; color: #00ffaa; font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; font-weight: 700; outline: none;">
+                            <button onclick="copyQRText()" style="background: linear-gradient(135deg, #00ffaa, #00d2ff); border: none; color: #0b0e14; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(0, 255, 170, 0.4);">
+                                📋 COPY TEXT
+                            </button>
+                            <a id="qr-open-link-btn" href="#" target="_blank" style="display: none; background: linear-gradient(135deg, #2563eb, #3b82f6); border: none; color: #fff; text-decoration: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.95rem; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);">
+                                🔗 OPEN LINK
+                            </a>
+                        </div>
+                        <div id="copy-toast-main" style="font-size: 0.85rem; color: #00ffaa; font-weight: 700; margin-top: 8px; display: none;">✅ Copied to clipboard!</div>
+                    </div>
+
+                    <!-- OCR EXTRACTED TEXT OUTPUT PANEL -->
+                    <div id="ocr-output-section" class="ocr-text-output" style="display: none;">
+                        <div class="ocr-label">
+                            📖 EXTRACTED TEXT:
+                            <select id="ocr-strategy-select" class="ocr-strategy-select" style="margin-left: auto;">
+                                <option value="auto">🔄 Auto</option>
+                                <option value="sign">🪧 Sign/Label</option>
+                                <option value="document">📄 Document</option>
+                                <option value="simple">⚡ Simple (Fast)</option>
+                            </select>
+                        </div>
+                        <div id="ocr-text-display" class="ocr-text-display">No text extracted yet.</div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="copyOCRText()" style="background: linear-gradient(135deg, #a855f7, #e74694); border: none; color: #fff; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);">
+                                📋 COPY TEXT
+                            </button>
+                            <button onclick="speakOCRText()" style="background: rgba(168, 85, 247, 0.25); border: 1.5px solid #a855f7; color: #c084fc; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
+                                🔊 READ ALOUD
+                            </button>
+                        </div>
+                        <div id="ocr-copy-toast" style="font-size: 0.85rem; color: #c084fc; font-weight: 700; margin-top: 8px; display: none;">✅ Copied to clipboard!</div>
+                    </div>
+
+                    <div id="main-summary-text" style="font-size: 1.1rem; color: #fff; font-weight: 500; line-height: 1.5; margin-bottom: 10px;"></div>
+                    <div id="main-tags-container" class="tag-list"></div>
+                </div>
+            </div>
+
+            <!-- General AI Q&A -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">🤖 General AI Assistant (Llama Q&A)</div>
+                    <button class="btn-speak" onclick="speakAIAnswer()">
+                        🔊 Speak Answer
+                    </button>
+                </div>
+
+                <p style="font-size: 0.88rem; color: var(--text-muted);">
+                    Ask any general questions by typing or speaking (e.g. <em>"What is a processor?"</em>, <em>"Bones in human body"</em>, <em>"DSP"</em>):
+                </p>
+
+                <div class="quick-prompts">
+                    <span class="chip blue-chip" onclick="describeCurrentFrame('scanner')">📱 Scan QR Code</span>
+                    <span class="chip gold-chip" onclick="describeCurrentFrame('currency')">💵 Detect Rupees</span>
+                    <span class="chip" style="border-color: rgba(168, 85, 247, 0.4); color: #c084fc;" onclick="describeCurrentFrame('ocr')">📖 Read Text</span>
+                    <span class="chip" onclick="quickAsk('What is a computer?')">💡 What is a computer?</span>
+                    <span class="chip" onclick="quickAsk('What is a processor?')">⚡ What is a processor?</span>
+                    <span class="chip" onclick="quickAsk('How many bones in human body?')">🦴 Human bones</span>
+                    <span class="chip" onclick="quickAsk('What is DSP?')">📊 What is DSP?</span>
+                </div>
+
+                <div class="ai-chat-input-wrapper">
+                    <input type="text" id="ai-query-input" class="ai-chat-input" placeholder="Ask general question or command..." onkeydown="if(event.key==='Enter') askAI()">
+                    <button class="btn-describe-main" style="padding: 12px 20px; flex: initial;" onclick="askAI()">
+                        🔍 Ask AI
+                    </button>
+                </div>
+
+                <div id="ai-answer-card" class="ai-answer-box" style="display:none; margin-top: 1rem;">
+                    <div style="font-weight: 600; color: var(--accent-purple); margin-bottom: 6px;">💡 AI Answer:</div>
+                    <div id="ai-answer-text" class="ai-answer-text">Thinking...</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar / Analysis Panel -->
+        <aside>
+            <!-- Settings Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">⚙️ Model Controls</div>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+                        <span>Confidence Threshold</span>
+                        <span id="conf-val" style="color: var(--accent-cyan); font-weight: 700;">0.25</span>
+                    </label>
+                    <input type="range" id="conf-slider" min="0.10" max="0.90" step="0.05" value="0.25" style="width: 100%; accent-color: var(--accent-cyan);" oninput="updateConf(this.value)">
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                    ⚡ Specific models (Currency, QR/Barcode, OCR) run <strong>ONLY</strong> when their mode is active.
+                </div>
+            </div>
+
+            <!-- Analysis Output Snapshot -->
+            <div id="snapshot-result-card" class="card" style="display: none;">
+                <div class="card-header">
+                    <div class="card-title" id="result-title">📸 Detected Snapshot</div>
+                    <button class="btn-speak" onclick="speakSummary()">
+                        🔊 Speak Result
+                    </button>
+                </div>
+
+                <div class="viewport-wrapper" style="aspect-ratio: 4 / 3;">
+                    <img id="snapshot-img" src="" alt="Snapshot output">
+                </div>
+
+                <div class="narrative-box">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); margin-bottom: 4px;" id="result-badge">
+                        SCENE NARRATIVE:
+                    </div>
+                    <div id="narrative-text" class="narrative-text">
+                        No snapshot captured yet.
+                    </div>
+
+                    <div id="relationships-tags" class="tag-list"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        let lastNarrative = "";
+        let lastAIAnswer = "";
+        let lastOCRText = "";
+        let currentMode = "object";
+
+        function setDetectionMode(mode) {
+            currentMode = mode;
+            const btnObj = document.getElementById('mode-btn-obj');
+            const btnCurr = document.getElementById('mode-btn-curr');
+            const btnScan = document.getElementById('mode-btn-scan');
+            const btnOcr = document.getElementById('mode-btn-ocr');
+
+            btnObj.className = 'tab-btn';
+            btnCurr.className = 'tab-btn';
+            btnScan.className = 'tab-btn';
+            btnOcr.className = 'tab-btn';
+
+            if (mode === 'scanner') {
+                btnScan.className = 'tab-btn scanner-active';
+                document.getElementById('voice-status').innerHTML = `📱 <strong>QR & BARCODE SCANNER ACTIVE:</strong> Point camera at QR code/barcode & click <em>"SCAN QR / BARCODE"</em>!`;
+            } else if (mode === 'currency') {
+                btnCurr.className = 'tab-btn currency-active';
+                document.getElementById('voice-status').innerHTML = `💵 <strong>INDIAN CURRENCY MODE ACTIVE:</strong> Click <em>"DETECT RUPEES"</em> or say <em>"Detect Rupees"</em>!`;
+            } else if (mode === 'ocr') {
+                btnOcr.className = 'tab-btn ocr-active';
+                document.getElementById('voice-status').innerHTML = `📖 <strong>OCR READER ACTIVE:</strong> Point camera at text & click <em>"READ TEXT"</em> or say <em>"Read this sign"</em>!`;
+            } else {
+                btnObj.className = 'tab-btn active';
+                document.getElementById('voice-status').innerHTML = `📦 <strong>GENERAL OBJECT MODE ACTIVE:</strong> Click <em>"SNAP & DESCRIBE"</em> or say <em>"Capture Photo"</em>!`;
+            }
+
+            fetch('/api/update_settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mode: mode })
+            });
+        }
+
+        function copyQRText() {
+            const input = document.getElementById('qr-link-input');
+            input.select();
+            input.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(input.value).then(() => {
+                const toast = document.getElementById('copy-toast-main');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2500);
+            });
+        }
+
+        function copyOCRText() {
+            const text = lastOCRText || document.getElementById('ocr-text-display').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('ocr-copy-toast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2500);
+            });
+        }
+
+        function triggerHardwareSpeak(text) {
+            if (!text) return;
+            fetch('/api/tts_speak', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            }).catch(e => console.log('Hardware TTS fallback notice:', e));
+        }
+
+        function speakOCRText() {
+            const text = lastOCRText;
+            if (!text) return;
+            triggerHardwareSpeak(text);
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function encodeWAV(samples, sampleRate) {
+            let buffer = new ArrayBuffer(44 + samples.length * 2);
+            let view = new DataView(buffer);
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + samples.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM
+            view.setUint16(22, 1, true); // Mono
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true); // 16-bit
+            writeString(view, 36, 'data');
+            view.setUint32(40, samples.length * 2, true);
+
+            let floatTo16BitPCM = function(output, offset, input) {
+                for (let i = 0; i < input.length; i++, offset += 2) {
+                    let s = Math.max(-1, Math.min(1, input[i]));
+                    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                }
+            };
+
+            floatTo16BitPCM(view, 44, samples);
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        async function recordVoiceCommand() {
+            const mainBtn = document.getElementById('voice-btn-main');
+            const hdrBtn = document.getElementById('voice-btn-hdr');
+            const statusBox = document.getElementById('voice-status');
+
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    mainBtn.classList.add('recording');
+                    hdrBtn.classList.add('recording');
+                    mainBtn.innerHTML = "🔴 LISTENING NOW...";
+                    hdrBtn.innerHTML = "🔴 Listening...";
+                    statusBox.style.display = 'block';
+                    statusBox.innerHTML = `🔴 <strong>LISTENING...</strong> Speak now! (e.g., <em>"Read this sign"</em>, <em>"Scan QR Code"</em>, <em>"Detect Rupees"</em>, or <em>"Capture Photo"</em>)`;
+                };
+
+                recognition.onresult = function(event) {
+                    mainBtn.classList.remove('recording');
+                    hdrBtn.classList.remove('recording');
+                    mainBtn.innerHTML = "🎙️ VOICE COMMAND";
+                    hdrBtn.innerHTML = "🎙️ Record Voice Command";
+
+                    const transcript = event.results[0][0].transcript.trim();
+                    statusBox.innerHTML = `🎙️ Transcribed: <strong>"${transcript}"</strong>`;
+
+                    const textLower = transcript.toLowerCase();
+                    const isScannerCmd = ["qr", "barcode", "scan", "scanner", "code", "link", "url"].some(w => textLower.includes(w));
+                    const isOCRCmd = !isScannerCmd && ["read", "text", "sign", "ocr", "book", "page", "label", "notice", "document", "letter"].some(w => textLower.includes(w));
+                    const isCurrencyCmd = !isScannerCmd && !isOCRCmd && ["rupee", "rupees", "currency", "money", "cash", "note"].some(w => textLower.includes(w));
+                    const isCaptureCmd = isScannerCmd || isOCRCmd || isCurrencyCmd || ["capture", "photo", "picture", "snap", "describe", "take"].some(w => textLower.includes(w));
+
+                    if (isScannerCmd) {
+                        setDetectionMode('scanner');
+                        statusBox.innerHTML = `⚡ <strong>Executing:</strong> Scanning QR code & Barcode...`;
+                        describeCurrentFrame('scanner');
+                    } else if (isOCRCmd) {
+                        setDetectionMode('ocr');
+                        statusBox.innerHTML = `⚡ <strong>Executing:</strong> Reading text with OCR...`;
+                        describeCurrentFrame('ocr');
+                    } else if (isCurrencyCmd) {
+                        setDetectionMode('currency');
+                        statusBox.innerHTML = `⚡ <strong>Executing:</strong> Detecting Indian Currency Notes (Rupees)...`;
+                        describeCurrentFrame('currency');
+                    } else if (isCaptureCmd) {
+                        statusBox.innerHTML = `⚡ <strong>Executing:</strong> Capturing Photo & Describing Frame...`;
+                        describeCurrentFrame(currentMode);
+                    } else {
+                        document.getElementById('ai-query-input').value = transcript;
+                        askAI();
+                    }
+                };
+
+                recognition.onerror = function(event) {
+                    console.log("Web Speech API error, using fallback:", event.error);
+                    fallbackAudioRecorder(mainBtn, hdrBtn, statusBox);
+                };
+
+                recognition.onend = function() {
+                    mainBtn.classList.remove('recording');
+                    hdrBtn.classList.remove('recording');
+                    mainBtn.innerHTML = "🎙️ VOICE COMMAND";
+                    hdrBtn.innerHTML = "🎙️ Record Voice Command";
+                };
+
+                try {
+                    recognition.start();
+                    return;
+                } catch (e) {
+                    console.log("SpeechRecognition start error:", e);
+                }
+            }
+
+            fallbackAudioRecorder(mainBtn, hdrBtn, statusBox);
+        }
+
+        async function fallbackAudioRecorder(mainBtn, hdrBtn, statusBox) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert("Microphone access is not supported in this browser.");
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+
+                const source = audioContext.createMediaStreamSource(stream);
+                const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                const audioSamples = [];
+
+                processor.onaudioprocess = e => {
+                    const input = e.inputBuffer.getChannelData(0);
+                    for (let i = 0; i < input.length; i++) {
+                        audioSamples.push(input[i]);
+                    }
+                };
+
+                source.connect(processor);
+                processor.connect(audioContext.destination);
+
+                mainBtn.classList.add('recording');
+                hdrBtn.classList.add('recording');
+                mainBtn.innerHTML = "🔴 RECORDING (3s)...";
+                hdrBtn.innerHTML = "🔴 Recording...";
+                statusBox.style.display = 'block';
+                statusBox.innerHTML = `🔴 <strong>RECORDING AUDIO (3 SEC)...</strong> Speak <em>"Read this sign"</em>, <em>"Scan QR Code"</em>, or <em>"Detect Rupees"</em>!`;
+
+                setTimeout(async () => {
+                    processor.disconnect();
+                    source.disconnect();
+                    stream.getTracks().forEach(track => track.stop());
+
+                    mainBtn.classList.remove('recording');
+                    hdrBtn.classList.remove('recording');
+                    mainBtn.innerHTML = "🎙️ VOICE COMMAND";
+                    hdrBtn.innerHTML = "🎙️ Record Voice Command";
+                    statusBox.innerHTML = `⚙️ <strong>Processing Speech...</strong>`;
+
+                    if (audioSamples.length === 0) {
+                        statusBox.innerHTML = `⚠️ Speech error: No audio captured. Please check microphone settings.`;
+                        return;
+                    }
+
+                    const wavBlob = encodeWAV(new Float32Array(audioSamples), audioContext.sampleRate);
+                    const formData = new FormData();
+                    formData.append('audio', wavBlob, 'command.wav');
+
+                    fetch('/api/process_voice_audio', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            statusBox.innerHTML = `🎙️ Transcribed: <strong>"${data.transcript}"</strong>`;
+                            if (data.is_scanner_command) {
+                                setDetectionMode('scanner');
+                                describeCurrentFrame('scanner');
+                            } else if (data.is_ocr_command) {
+                                setDetectionMode('ocr');
+                                describeCurrentFrame('ocr');
+                            } else if (data.is_currency_command) {
+                                setDetectionMode('currency');
+                                describeCurrentFrame('currency');
+                            } else if (data.is_capture_command) {
+                                describeCurrentFrame(data.target_mode || currentMode);
+                            } else {
+                                document.getElementById('ai-query-input').value = data.transcript;
+                                askAI();
+                            }
+                        } else {
+                            statusBox.innerHTML = `⚠️ Speech error: ${data.error || 'Could not understand audio.'}`;
+                        }
+                    })
+                    .catch(err => {
+                        statusBox.innerHTML = `❌ Error processing speech: ${err.message}`;
+                    });
+                }, 3000);
+
+            } catch (err) {
+                statusBox.innerHTML = `❌ Microphone permission error: ${err.message}`;
+                alert("Microphone permission denied.");
+            }
+        }
+
+        function startLiveStream() {
+            const streamImg = document.getElementById('camera-stream');
+            function fetchFrame() {
+                fetch('/api/get_live_frame')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.image_b64) {
+                            streamImg.src = data.image_b64;
+                        }
+                        if (data && data.camera_index !== undefined) {
+                            const sel = document.getElementById('camera-select');
+                            if (sel && sel.value !== String(data.camera_index)) {
+                                sel.value = String(data.camera_index);
+                            }
+                        }
+                    })
+                    .catch(err => console.log(err));
+            }
+            fetchFrame();
+            setInterval(fetchFrame, 65);
+        }
+
+        function changeCameraSource(cameraIndex) {
+            const statusEl = document.getElementById('voice-status');
+            if (statusEl) {
+                statusEl.innerHTML = `🔄 <em>Switching to Camera ${cameraIndex}...</em>`;
+            }
+            fetch('/api/switch_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ camera_index: parseInt(cameraIndex) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const camName = data.camera_index === 2 ? 'Lenovo FHD Webcam (External)' : 'HP Wide Vision HD (Laptop)';
+                    if (statusEl) {
+                        statusEl.innerHTML = `✅ <strong>Camera Active:</strong> ${camName}`;
+                    }
+                } else {
+                    alert('Could not switch to selected camera. Reverting...');
+                }
+            })
+            .catch(err => console.error('Camera switch error:', err));
+        }
+
+        window.onload = function() {
+            startLiveStream();
+        };
+
+        function switchView(view) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (view === 'live') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('live-view').style.display = 'flex';
+                document.getElementById('upload-view').style.display = 'none';
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('live-view').style.display = 'none';
+                document.getElementById('upload-view').style.display = 'flex';
+            }
+        }
+
+        function updateConf(val) {
+            document.getElementById('conf-val').innerText = val;
+            fetch('/api/update_settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conf: parseFloat(val) })
+            });
+        }
+
+        function quickAsk(q) {
+            document.getElementById('ai-query-input').value = q;
+            askAI();
+        }
+
+        function askAI() {
+            const input = document.getElementById('ai-query-input');
+            const question = input.value.trim();
+            if (!question) return;
+
+            const card = document.getElementById('ai-answer-card');
+            const textBox = document.getElementById('ai-answer-text');
+            card.style.display = 'block';
+            textBox.innerText = "Thinking...";
+
+            fetch('/api/ask_ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    lastAIAnswer = data.answer;
+                    textBox.innerText = data.answer;
+                    speakAIAnswer();
+                } else {
+                    textBox.innerText = "Error: " + (data.error || "Could not process request");
+                }
+            })
+            .catch(err => {
+                textBox.innerText = "Error querying AI: " + err.message;
+            });
+        }
+
+        function describeCurrentFrame(overrideMode) {
+            const activeModeToUse = overrideMode || currentMode;
+            if (overrideMode) {
+                setDetectionMode(overrideMode);
+            }
+
+            const narrativeBox = document.getElementById('narrative-text');
+            const badge = document.getElementById('result-badge');
+            const resultTitle = document.getElementById('result-title');
+
+            const mainBox = document.getElementById('main-result-box');
+            const mainTitle = document.getElementById('main-result-title');
+            const qrOutputSection = document.getElementById('qr-output-section');
+            const qrLinkInput = document.getElementById('qr-link-input');
+            const qrOpenLinkBtn = document.getElementById('qr-open-link-btn');
+            const mainSummaryText = document.getElementById('main-summary-text');
+            const mainTagsContainer = document.getElementById('main-tags-container');
+            const ocrOutputSection = document.getElementById('ocr-output-section');
+
+            qrOutputSection.style.display = 'none';
+            qrOpenLinkBtn.style.display = 'none';
+            ocrOutputSection.style.display = 'none';
+
+            if (activeModeToUse === 'scanner') {
+                narrativeBox.innerText = "Scanning for QR Code or Barcode...";
+                mainSummaryText.innerText = "Scanning for QR Code or Barcode...";
+            } else if (activeModeToUse === 'currency') {
+                narrativeBox.innerText = "Analyzing Indian Currency Notes (Rupees)...";
+                mainSummaryText.innerText = "Analyzing Indian Currency Notes (Rupees)...";
+            } else if (activeModeToUse === 'ocr') {
+                narrativeBox.innerText = "Reading text with OCR...";
+                mainSummaryText.innerText = "Reading text with OCR...";
+            } else {
+                narrativeBox.innerText = "Capturing photo & analyzing objects...";
+                mainSummaryText.innerText = "Capturing photo & analyzing objects...";
+            }
+
+            const ocrStrategy = document.getElementById('ocr-strategy-select') ? document.getElementById('ocr-strategy-select').value : 'auto';
+
+            fetch('/api/describe_current_frame', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    conf: parseFloat(document.getElementById('conf-slider').value),
+                    mode: activeModeToUse,
+                    ocr_strategy: ocrStrategy
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    lastNarrative = data.narrative_summary;
+                    narrativeBox.innerHTML = `"${data.narrative_summary}"`;
+                    mainSummaryText.innerHTML = `"${data.narrative_summary}"`;
+
+                    document.getElementById('snapshot-img').src = data.image_b64;
+                    document.getElementById('snapshot-result-card').style.display = 'block';
+                    mainBox.style.display = 'block';
+
+                    if (data.mode === 'scanner') {
+                        resultTitle.innerText = "📱 QR & Barcode Result";
+                        mainTitle.innerText = "📱 QR & Barcode Result";
+                        badge.innerText = "SCANNED CONTENT:";
+                        badge.style.color = "#60a5fa";
+                        mainBox.style.borderColor = "#3b82f6";
+
+                        if (data.details && data.details.length > 0) {
+                            const firstDetail = data.details[0];
+                            const rawText = firstDetail.data;
+                            qrLinkInput.value = rawText;
+                            qrOutputSection.style.display = 'block';
+
+                            if (firstDetail.is_url || rawText.startsWith('http://') || rawText.startsWith('https://') || rawText.startsWith('www.')) {
+                                const targetUrl = rawText.startsWith('www.') ? 'https://' + rawText : rawText;
+                                qrOpenLinkBtn.href = targetUrl;
+                                qrOpenLinkBtn.style.display = 'flex';
+                            }
+                        }
+                    } else if (data.mode === 'currency') {
+                        resultTitle.innerText = "💵 Currency Detection Result";
+                        mainTitle.innerText = "💵 Currency Detection Result";
+                        badge.innerText = "CURRENCY SUMMARY & AMOUNT:";
+                        badge.style.color = "var(--accent-gold)";
+                        mainBox.style.borderColor = "var(--accent-gold)";
+                    } else if (data.mode === 'ocr') {
+                        resultTitle.innerText = "📖 OCR Text Reader Result";
+                        mainTitle.innerText = "📖 OCR Text Reader Result";
+                        badge.innerText = "EXTRACTED TEXT:";
+                        badge.style.color = "#c084fc";
+                        mainBox.style.borderColor = "#a855f7";
+
+                        if (data.extracted_text) {
+                            lastOCRText = data.extracted_text;
+                            document.getElementById('ocr-text-display').innerText = data.extracted_text;
+                            ocrOutputSection.style.display = 'block';
+                        }
+
+                        // For OCR, speak the speech_text (voice-friendly summary) instead of narrative
+                        if (data.speech_text) {
+                            lastNarrative = data.speech_text;
+                        }
+                    } else {
+                        resultTitle.innerText = "📸 Object Detection Result";
+                        mainTitle.innerText = "📸 Object Detection Result";
+                        badge.innerText = "SCENE NARRATIVE:";
+                        badge.style.color = "var(--accent-cyan)";
+                        mainBox.style.borderColor = "var(--accent-cyan)";
+                    }
+
+                    const tagContainer = document.getElementById('relationships-tags');
+                    tagContainer.innerHTML = '';
+                    mainTagsContainer.innerHTML = '';
+
+                    if (data.relationships && data.relationships.length > 0) {
+                        data.relationships.forEach(rel => {
+                            const tag = document.createElement('span');
+                            const tag2 = document.createElement('span');
+                            const cls = data.mode === 'scanner' ? 'tag scanner-tag' : (data.mode === 'currency' ? 'tag currency-tag' : (data.mode === 'ocr' ? 'tag ocr-tag' : 'tag'));
+                            tag.className = cls;
+                            tag2.className = cls;
+                            tag.innerText = `⚡ ${rel}`;
+                            tag2.innerText = `⚡ ${rel}`;
+                            tagContainer.appendChild(tag);
+                            mainTagsContainer.appendChild(tag2);
+                        });
+                    } else {
+                        tagContainer.innerHTML = '<span class="tag">No codes detected</span>';
+                        mainTagsContainer.innerHTML = '<span class="tag">No codes detected</span>';
+                    }
+
+                    mainBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    speakSummary();
+                }
+            });
+        }
+
+        function uploadImage(input) {
+            if (!input.files || !input.files[0]) return;
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('conf', document.getElementById('conf-slider').value);
+            formData.append('mode', currentMode);
+
+            const mainBox = document.getElementById('main-result-box');
+            const mainTitle = document.getElementById('main-result-title');
+            const qrOutputSection = document.getElementById('qr-output-section');
+            const qrLinkInput = document.getElementById('qr-link-input');
+            const qrOpenLinkBtn = document.getElementById('qr-open-link-btn');
+            const mainSummaryText = document.getElementById('main-summary-text');
+            const mainTagsContainer = document.getElementById('main-tags-container');
+
+            qrOutputSection.style.display = 'none';
+            qrOpenLinkBtn.style.display = 'none';
+
+            fetch('/api/detect_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    lastNarrative = data.narrative_summary;
+                    document.getElementById('narrative-text').innerHTML = `"${data.narrative_summary}"`;
+                    mainSummaryText.innerHTML = `"${data.narrative_summary}"`;
+
+                    const img = document.getElementById('upload-result-img');
+                    img.src = data.image_b64;
+                    img.style.display = 'block';
+                    document.querySelector('.dropzone').style.display = 'none';
+
+                    mainBox.style.display = 'block';
+
+                    if (data.mode === 'scanner' && data.details && data.details.length > 0) {
+                        const firstDetail = data.details[0];
+                        const rawText = firstDetail.data;
+                        qrLinkInput.value = rawText;
+                        qrOutputSection.style.display = 'block';
+
+                        if (firstDetail.is_url || rawText.startsWith('http://') || rawText.startsWith('https://') || rawText.startsWith('www.')) {
+                            const targetUrl = rawText.startsWith('www.') ? 'https://' + rawText : rawText;
+                            qrOpenLinkBtn.href = targetUrl;
+                            qrOpenLinkBtn.style.display = 'flex';
+                        }
+                    }
+
+                    const tagContainer = document.getElementById('relationships-tags');
+                    tagContainer.innerHTML = '';
+                    mainTagsContainer.innerHTML = '';
+
+                    if (data.relationships && data.relationships.length > 0) {
+                        data.relationships.forEach(rel => {
+                            const tag = document.createElement('span');
+                            const tag2 = document.createElement('span');
+                            const cls = data.mode === 'scanner' ? 'tag scanner-tag' : (data.mode === 'currency' ? 'tag currency-tag' : 'tag');
+                            tag.className = cls;
+                            tag2.className = cls;
+                            tag.innerText = `⚡ ${rel}`;
+                            tag2.innerText = `⚡ ${rel}`;
+                            tagContainer.appendChild(tag);
+                            mainTagsContainer.appendChild(tag2);
+                        });
+                    }
+
+                    mainBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    speakSummary();
+                }
+            });
+        }
+
+        function speakSummary() {
+            if (!lastNarrative) return;
+            triggerHardwareSpeak(lastNarrative);
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(lastNarrative);
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function speakAIAnswer() {
+            if (!lastAIAnswer) return;
+            triggerHardwareSpeak(lastAIAnswer);
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(lastAIAnswer);
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Lightweight Python Requirements for Raspberry Pi OS (ARM64)
+# System packages (OpenCV, NumPy, Pillow, Picamera2, Hailo, Tesseract) are installed via apt in setup_raspi_hailo.sh
+
+Flask>=2.0.0
+speechrecognition>=3.8.1
+requests>=2.28.0
+pyzbar>=0.1.9
+onnxruntime>=1.14.0
+pytesseract>=0.3.10
+rapidocr-onnxruntime>=1.3.0
